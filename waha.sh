@@ -92,15 +92,24 @@ pct create $CTID $TEMPLATE \
   --cores $CORES \
   --rootfs $STORAGE:$DISK_SIZE \
   --net0 name=eth0,bridge=$BRIDGE,ip=dhcp \
-  --unprivileged 1 \
-  --features nesting=1 \
+  --unprivileged 0 \
+  --features nesting=1,keyctl=1 \
   --onboot 1 \
-  --start 1
+  --start 0
 
 if [ $? -ne 0 ]; then
   msg_error "Failed to create container"
 fi
 msg_ok "Container created (CTID: $CTID)"
+
+# Configure container for Docker
+msg_info "Configuring container for Docker..."
+pct set $CTID -features nesting=1,keyctl=1
+pct set $CTID -onboot 1
+
+# Start container
+msg_info "Starting container..."
+pct start $CTID
 
 # Wait for container to start
 msg_info "Waiting for container to start..."
